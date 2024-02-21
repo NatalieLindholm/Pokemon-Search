@@ -1,40 +1,71 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import './index.css'
 
 function App() {
-const [data, setData] = useState();
+const [data, setData] = useState<any>(null);
+const [search, setSearch] = useState('')
 
-  useEffect(() => {
-    const api = async () => {
-      const pokemonApi = await fetch("https://pokeapi.co/api/v2/pokemon/ditto", {
-        method: 'GET'
-      })
-      const pokemonData = await pokemonApi.json()
-    console.log(pokemonData);
-    
-    }
+ const onSearch = () => {
+  const api = async () => {
+    // Request data from api
+    const pokemonApi = await fetch(`https://pokeapi.co/api/v2/pokemon/${search}`, {
+      method: 'GET'
+    })
 
-    api()
-  }, [])
+    // Check if request was valid, if not return error
+if(pokemonApi.ok){
+  const pokemonData = await pokemonApi.json()
+  setData(pokemonData)
+} else {
+  console.error('Error no data', Error); 
+}
+  }
+  api()
+ }
+  
+console.log(data);
 
   return (
     <>
-      <div className="bg-blue-100 h-screen">
-<h1>Pokemon Search</h1>
-<input type="text" placeholder='Search pokemon...' />
-<button>Search</button>
+      <div className="bg-blue-100 h-screen flex flex-col justify-center items-center">
+        <div className='shadow-md rounded-xl text-2xl w-96 bg-white h-16 flex justify-center items-center font-extrabold'>
+          <h1>Pokemon Search</h1>
+        </div>
 
-<div>
-  {/* display search here */}
-<h2>name</h2>
-<img src="" alt="" />
-<p>Height:</p>
-<p>Weight:</p>
-<p>Type:</p>
-<p>Stats:</p>
-<p>Abilities:</p>
-<p>Moves:</p>
+<div className='m-3 flex'>
+  <input className='mr-2 hover:bg-slate-100 pl-3 shadow-md rounded-xl text-1xl w-72 bg-white h-14 flex justify-center items-center font-extrabold' 
+    type="text" 
+    placeholder='Search pokemon...' 
+    value={search} 
+    onChange={(e) => setSearch(e.target.value)} 
+  />
+
+  <button  
+    className='hover:bg-slate-100 shadow-md rounded-xl text-lg w-48 bg-white h-14 flex justify-center items-center font-extrabold' 
+    onClick={onSearch}
+    >Search</button>
 </div>
+
+{data != null && !data.count &&
+ 
+<div  className='shadow-md rounded-xl text-1xl w-96 h-80 bg-white py-4 flex flex-row justify-evenly'>
+ <div className=''> 
+<img className='m-3 w-32'
+src={data.sprites.front_default} 
+alt= {data.name} />
+
+<h2 className='text-2xl text-gray-900 font-extrabold mb-2'>{data.name}</h2>
+    <p><b>Height:</b> {data.height}</p>
+    <p><b>Weight:</b> {data.weight}</p>
+    <p><b>Type:</b> {data.types.map((pokemonType:any) => <span>{pokemonType.type.name},</span>)}</p>
+</div>
+
+<div className='flex flex-col justify-center gap-5'>
+    <p><b>Abilities:</b> {data.abilities.map((pokemonAbility:any) => <li>{pokemonAbility.ability.name}</li>)}</p>
+    <p><b>Stats:</b> {data.stats.map((pokemonStats:any) => <li>{pokemonStats.stat.name} </li>)}</p>
+</div>
+</div>}
+
 
       </div>
     </>
